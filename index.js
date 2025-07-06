@@ -60,7 +60,7 @@ class UnichMiner {
 
   async fetchUserInfo() {
     try {
-      const response = await axios.get('https://api.unich.com/airdrop/user/v1/info/my-info', {
+      const response = await axios.get('https://api.pxmine.com/api/v2/auth/profile', {
         headers: {
           'authorization': `Bearer ${this.token}`,
           'user-agent': this.getRandomUserAgent(),
@@ -68,10 +68,10 @@ class UnichMiner {
           'accept-encoding': 'gzip, deflate, br, zstd',
           'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
           'cache-control': 'no-cache',
-          'origin': 'https://unich.com',
+          'origin': 'https://api.pxmine.com/',
           'pragma': 'no-cache',
           'priority': 'u=1, i',
-          'referer': 'https://unich.com/',
+          'referer': 'https://api.pxmine.com/',
           'sec-ch-ua': '"Chromium";v="134", "Not:A-Brand";v="24", "Opera";v="119"',
           'sec-ch-ua-mobile': '?0',
           'sec-ch-ua-platform': '"Windows"',
@@ -111,7 +111,7 @@ class UnichMiner {
 
   async startMining() {
     try {
-      await axios.post('https://api.unich.com/airdrop/user/v1/mining/start', {}, {
+      await axios.post('https://api.pxmine.com/api/v2/mining/start', {}, {
         headers: {
           'authorization': `Bearer ${this.token}`,
           'user-agent': this.getRandomUserAgent(),
@@ -119,10 +119,10 @@ class UnichMiner {
           'accept-encoding': 'gzip, deflate, br, zstd',
           'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
           'cache-control': 'no-cache',
-          'origin': 'https://unich.com',
+          'origin': 'https://api.pxmine.com',
           'pragma': 'no-cache',
           'priority': 'u=1, i',
-          'referer': 'https://unich.com/',
+          'referer': 'https://api.pxmine.com/',
           'sec-ch-ua': '"Chromium";v="134", "Not:A-Brand";v="24", "Opera";v="119"',
           'sec-ch-ua-mobile': '?0',
           'sec-ch-ua-platform': '"Windows"',
@@ -149,7 +149,7 @@ class UnichMiner {
 
   async updateUserInfo() {
     try {
-      const response = await axios.get('https://api.unich.com/airdrop/user/v1/info/my-info', {
+      const response = await axios.get('https://api.pxmine.com/api/v2/auth/profile', {
         headers: {
           'authorization': `Bearer ${this.token}`,
           'user-agent': this.getRandomUserAgent(),
@@ -157,10 +157,10 @@ class UnichMiner {
           'accept-encoding': 'gzip, deflate, br, zstd',
           'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
           'cache-control': 'no-cache',
-          'origin': 'https://unich.com',
+          'origin': 'https://api.pxmine.com',
           'pragma': 'no-cache',
           'priority': 'u=1, i',
-          'referer': 'https://unich.com/',
+          'referer': 'https://api.pxmine.com/',
           'sec-ch-ua': '"Chromium";v="134", "Not:A-Brand";v="24", "Opera";v="119"',
           'sec-ch-ua-mobile': '?0',
           'sec-ch-ua-platform': '"Windows"',
@@ -320,7 +320,7 @@ class UnichMiner {
 async function main() {
   const screen = blessed.screen({
     smartCSR: true,
-    title: 'Unich Auto Mining',
+    title: 'PxNetwork Auto Mining',
   });
 
   const headerPane = blessed.box({
@@ -338,7 +338,7 @@ async function main() {
     const margin = Math.max(screen.width - 80, 0);
     let art = "";
     if (screen.width >= threshold) {
-      art = cfonts.render('NT EXHAUST', {
+      art = cfonts.render('JALANCUAN', {
         font: 'block',
         align: 'center',
         colors: ['cyan', 'magenta'],
@@ -373,7 +373,7 @@ async function main() {
     tags: false,
     align: 'center',
   });
-  channelPane2.setContent('✪ BOT UNICH AUTO MINING ✪');
+  channelPane2.setContent('✪ BOT PXNETWORK AUTO MINING ✪');
   screen.append(channelPane2);
 
   const infoPane = blessed.box({

@@ -161,44 +161,7 @@ class UnichMiner {
   }
 }
 
-  async updateUserInfo() {
-  try {
-    const response = await axios.get('https://api.pxmine.com/api/v2/auth/profile', {
-      headers: {
-        'authorization': `Bearer ${this.token}`,
-        'user-agent': this.getRandomUserAgent(),
-        'accept': 'application/json, text/plain, */*',
-        'accept-encoding': 'gzip, deflate, br, zstd',
-        'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
-        'cache-control': 'no-cache',
-        'origin': 'https://api.pxmine.com/',
-        'pragma': 'no-cache',
-        'priority': 'u=1, i',
-        'referer': 'https://api.pxmine.com/',
-        'sec-ch-ua': '"Chromium";v="134", "Not:A-Brand";v="24", "Opera";v="119"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-site',
-      },
-      ...(this.proxy ? {
-        httpsAgent: this.proxy.type === 'socks5'
-          ? new SocksProxyAgent(this.proxy.url)
-          : new HttpsProxyAgent(this.proxy.url),
-        httpAgent: this.proxy.type === 'socks5'
-          ? new SocksProxyAgent(this.proxy.url)
-          : new HttpsProxyAgent(this.proxy.url),
-      } : {}),
-    });
-
-    const data = response.data.data;
-    this.userInfo = data;
-    this.email = data.email;
-    this.totalPoints = data.mUn || 0;
-
-    const todayMining = data.mining?.todayMining;
-    if (todayMining && todayMining.started) {
+      if (todayMining && todayMining.started) {
       this.status = 'Mining Started';
       this.nextMining = this.formatTime(todayMining.remainingTimeInMillis);
       this.addLog(chalk.green('Mining is running'));
@@ -216,9 +179,8 @@ class UnichMiner {
       this.status = 'Error';
     }
     this.refreshDisplay();
-      }
-    }, 1000);
   }
+}
 
   formatTime(millis) {
     const seconds = Math.floor(millis / 1000);

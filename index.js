@@ -59,162 +59,163 @@ class UnichMiner {
   }
 
   async fetchUserInfo() {
-    try {
-      const response = await axios.get('https://api.pxmine.com/api/v2/auth/profile', {
-        headers: {
-          'authorization': `Bearer ${this.token}`,
-          'user-agent': this.getRandomUserAgent(),
-          'accept': 'application/json, text/plain, */*',
-          'accept-encoding': 'gzip, deflate, br, zstd',
-          'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
-          'cache-control': 'no-cache',
-          'origin': 'https://api.pxmine.com/',
-          'pragma': 'no-cache',
-          'priority': 'u=1, i',
-          'referer': 'https://api.pxmine.com/',
-          'sec-ch-ua': '"Chromium";v="134", "Not:A-Brand";v="24", "Opera";v="119"',
-          'sec-ch-ua-mobile': '?0',
-          'sec-ch-ua-platform': '"Windows"',
-          'sec-fetch-dest': 'empty',
-          'sec-fetch-mode': 'cors',
-          'sec-fetch-site': 'same-site',
-        },
-        ...(this.proxy ? {
-          httpsAgent: this.proxy.type === 'socks5' ? new SocksProxyAgent(this.proxy.url) : new HttpsProxyAgent(this.proxy.url),
-          httpAgent: this.proxy.type === 'socks5' ? new SocksProxyAgent(this.proxy.url) : new HttpsProxyAgent(this.proxy.url),
-        } : {}),
-      });
-      const data = response.data.data;
-      this.userInfo = data;
-      this.email = data.email;
-      this.totalPoints = data.mUn || 0;
-      this.addLog(chalk.green('User info fetched successfully'));
-      if (data.mining.todayMining.started) {
-        this.status = 'Mining Started';
-        this.nextMining = this.formatTime(data.mining.todayMining.remainingTimeInMillis);
-        this.addLog(chalk.green('Mining is running'));
-      } else {
-        this.status = 'Idle';
-        this.nextMining = '-';
-        this.addLog(chalk.yellow('Mining is not running'));
-        await this.startMining();
-      }
-    } catch (error) {
-      this.addLog(chalk.red(`Failed to fetch user info: ${error.message}`));
-      if (error.response && error.response.status === 401) {
-        this.addLog(chalk.red('Invalid token: Unauthorized (401)'));
-        this.status = 'Error';
-      }
+  try {
+    const response = await axios.get('https://api.pxmine.com/api/v2/auth/profile', {
+      headers: {
+        'authorization': `Bearer ${this.token}`,
+        'user-agent': this.getRandomUserAgent(),
+        'accept': 'application/json, text/plain, */*',
+        'accept-encoding': 'gzip, deflate, br, zstd',
+        'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+        'cache-control': 'no-cache',
+        'origin': 'https://api.pxmine.com/',
+        'pragma': 'no-cache',
+        'priority': 'u=1, i',
+        'referer': 'https://api.pxmine.com/',
+        'sec-ch-ua': '"Chromium";v="134", "Not:A-Brand";v="24", "Opera";v="119"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-site',
+      },
+      ...(this.proxy ? {
+        httpsAgent: this.proxy.type === 'socks5'
+          ? new SocksProxyAgent(this.proxy.url)
+          : new HttpsProxyAgent(this.proxy.url),
+        httpAgent: this.proxy.type === 'socks5'
+          ? new SocksProxyAgent(this.proxy.url)
+          : new HttpsProxyAgent(this.proxy.url),
+      } : {}),
+    });
+
+    const data = response.data.data;
+    this.userInfo = data;
+    this.email = data.email;
+    this.totalPoints = data.mUn || 0;
+    this.addLog(chalk.green('User info fetched successfully'));
+
+    const todayMining = data.mining?.todayMining;
+    if (todayMining && todayMining.started) {
+      this.status = 'Mining Started';
+      this.nextMining = this.formatTime(todayMining.remainingTimeInMillis);
+      this.addLog(chalk.green('Mining is running'));
+    } else {
+      this.status = 'Idle';
+      this.nextMining = '-';
+      this.addLog(chalk.yellow('Mining is not running or not available'));
+    }
+
+  } catch (error) {
+    this.addLog(chalk.red(`Failed to fetch user info: ${error.message}`));
+    if (error.response && error.response.status === 401) {
+      this.addLog(chalk.red('Invalid token: Unauthorized (401)'));
+      this.status = 'Error';
+    }
+  }
+
+  this.refreshDisplay();
+}
+
+  async startMining() {
+  try {
+    await axios.post('https://api.pxmine.com/api/v2/mining/start', {}, {
+      headers: {
+        'authorization': `Bearer ${this.token}`,
+        'user-agent': this.getRandomUserAgent(),
+        'accept': 'application/json, text/plain, */*',
+        'accept-encoding': 'gzip, deflate, br, zstd',
+        'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+        'cache-control': 'no-cache',
+        'origin': 'https://api.pxmine.com',
+        'pragma': 'no-cache',
+        'priority': 'u=1, i',
+        'referer': 'https://api.pxmine.com/',
+        'sec-ch-ua': '"Chromium";v="134", "Not:A-Brand";v="24", "Opera";v="119"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-site',
+      },
+      ...(this.proxy ? {
+        httpsAgent: this.proxy.type === 'socks5'
+          ? new SocksProxyAgent(this.proxy.url)
+          : new HttpsProxyAgent(this.proxy.url),
+        httpAgent: this.proxy.type === 'socks5'
+          ? new SocksProxyAgent(this.proxy.url)
+          : new HttpsProxyAgent(this.proxy.url),
+      } : {}),
+    });
+
+    this.addLog(chalk.green('Mining started successfully'));
+    await this.updateUserInfo();
+
+  } catch (error) {
+    this.addLog(chalk.red(`Failed to start mining: ${error.message}`));
+    if (error.response && error.response.status === 401) {
+      this.addLog(chalk.red('Invalid token: Unauthorized (401)'));
+      this.status = 'Error';
     }
     this.refreshDisplay();
   }
-
-  async startMining() {
-    try {
-      await axios.post('https://api.pxmine.com/api/v2/mining/start', {}, {
-        headers: {
-          'authorization': `Bearer ${this.token}`,
-          'user-agent': this.getRandomUserAgent(),
-          'accept': 'application/json, text/plain, */*',
-          'accept-encoding': 'gzip, deflate, br, zstd',
-          'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
-          'cache-control': 'no-cache',
-          'origin': 'https://api.pxmine.com',
-          'pragma': 'no-cache',
-          'priority': 'u=1, i',
-          'referer': 'https://api.pxmine.com/',
-          'sec-ch-ua': '"Chromium";v="134", "Not:A-Brand";v="24", "Opera";v="119"',
-          'sec-ch-ua-mobile': '?0',
-          'sec-ch-ua-platform': '"Windows"',
-          'sec-fetch-dest': 'empty',
-          'sec-fetch-mode': 'cors',
-          'sec-fetch-site': 'same-site',
-        },
-        ...(this.proxy ? {
-          httpsAgent: this.proxy.type === 'socks5' ? new SocksProxyAgent(this.proxy.url) : new HttpsProxyAgent(this.proxy.url),
-          httpAgent: this.proxy.type === 'socks5' ? new SocksProxyAgent(this.proxy.url) : new HttpsProxyAgent(this.proxy.url),
-        } : {}),
-      });
-      this.addLog(chalk.green('Mining started successfully'));
-      await this.updateUserInfo();
-    } catch (error) {
-      this.addLog(chalk.red(`Failed to start mining: ${error.message}`));
-      if (error.response && error.response.status === 401) {
-        this.addLog(chalk.red('Invalid token: Unauthorized (401)'));
-        this.status = 'Error';
-      }
-      this.refreshDisplay();
-    }
-  }
+}
 
   async updateUserInfo() {
-    try {
-      const response = await axios.get('https://api.pxmine.com/api/v2/auth/profile', {
-        headers: {
-          'authorization': `Bearer ${this.token}`,
-          'user-agent': this.getRandomUserAgent(),
-          'accept': 'application/json, text/plain, */*',
-          'accept-encoding': 'gzip, deflate, br, zstd',
-          'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
-          'cache-control': 'no-cache',
-          'origin': 'https://api.pxmine.com',
-          'pragma': 'no-cache',
-          'priority': 'u=1, i',
-          'referer': 'https://api.pxmine.com/',
-          'sec-ch-ua': '"Chromium";v="134", "Not:A-Brand";v="24", "Opera";v="119"',
-          'sec-ch-ua-mobile': '?0',
-          'sec-ch-ua-platform': '"Windows"',
-          'sec-fetch-dest': 'empty',
-          'sec-fetch-mode': 'cors',
-          'sec-fetch-site': 'same-site',
-        },
-        ...(this.proxy ? {
-          httpsAgent: this.proxy.type === 'socks5' ? new SocksProxyAgent(this.proxy.url) : new HttpsProxyAgent(this.proxy.url),
-          httpAgent: this.proxy.type === 'socks5' ? new SocksProxyAgent(this.proxy.url) : new HttpsProxyAgent(this.proxy.url),
-        } : {}),
-      });
-      const data = response.data.data;
-      this.userInfo = data;
-      this.email = data.email;
-      this.totalPoints = data.mUn || 0;
-      if (data.mining.todayMining.started) {
-        this.status = 'Mining Started';
-        this.nextMining = this.formatTime(data.mining.todayMining.remainingTimeInMillis);
-        this.addLog(chalk.green('Mining is running'));
-      } else {
-        this.status = 'Idle';
-        this.nextMining = '-';
-        this.addLog(chalk.yellow('Mining is not running'));
-      }
-      this.refreshDisplay();
-    } catch (error) {
-      this.addLog(chalk.red(`Failed to update user info: ${error.message}`));
-      if (error.response && error.response.status === 401) {
-        this.addLog(chalk.red('Invalid token: Unauthorized (401)'));
-        this.status = 'Error';
-      }
-      this.refreshDisplay();
-    }
-  }
+  try {
+    const response = await axios.get('https://api.pxmine.com/api/v2/auth/profile', {
+      headers: {
+        'authorization': `Bearer ${this.token}`,
+        'user-agent': this.getRandomUserAgent(),
+        'accept': 'application/json, text/plain, */*',
+        'accept-encoding': 'gzip, deflate, br, zstd',
+        'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+        'cache-control': 'no-cache',
+        'origin': 'https://api.pxmine.com/',
+        'pragma': 'no-cache',
+        'priority': 'u=1, i',
+        'referer': 'https://api.pxmine.com/',
+        'sec-ch-ua': '"Chromium";v="134", "Not:A-Brand";v="24", "Opera";v="119"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-site',
+      },
+      ...(this.proxy ? {
+        httpsAgent: this.proxy.type === 'socks5'
+          ? new SocksProxyAgent(this.proxy.url)
+          : new HttpsProxyAgent(this.proxy.url),
+        httpAgent: this.proxy.type === 'socks5'
+          ? new SocksProxyAgent(this.proxy.url)
+          : new HttpsProxyAgent(this.proxy.url),
+      } : {}),
+    });
 
-  startCountdown() {
-    if (this.countdownInterval) {
-      clearInterval(this.countdownInterval);
+    const data = response.data.data;
+    this.userInfo = data;
+    this.email = data.email;
+    this.totalPoints = data.mUn || 0;
+
+    const todayMining = data.mining?.todayMining;
+    if (todayMining && todayMining.started) {
+      this.status = 'Mining Started';
+      this.nextMining = this.formatTime(todayMining.remainingTimeInMillis);
+      this.addLog(chalk.green('Mining is running'));
+    } else {
+      this.status = 'Idle';
+      this.nextMining = '-';
+      this.addLog(chalk.yellow('Mining is not running or not available'));
     }
-    this.countdownInterval = setInterval(() => {
-      if (this.userInfo.mining && this.userInfo.mining.todayMining.started) {
-        const remaining = this.userInfo.mining.todayMining.remainingTimeInMillis - 1000;
-        if (remaining <= 0) {
-          this.userInfo.mining.todayMining.remainingTimeInMillis = 0;
-          this.nextMining = '-';
-          this.status = 'Idle';
-          this.addLog(chalk.yellow('Mining is not running'));
-          setTimeout(() => this.fetchUserInfo(), 10000);
-        } else {
-          this.userInfo.mining.todayMining.remainingTimeInMillis = remaining;
-          this.nextMining = this.formatTime(remaining);
-        }
-        this.refreshDisplay();
+
+    this.refreshDisplay();
+  } catch (error) {
+    this.addLog(chalk.red(`Failed to update user info: ${error.message}`));
+    if (error.response && error.response.status === 401) {
+      this.addLog(chalk.red('Invalid token: Unauthorized (401)'));
+      this.status = 'Error';
+    }
+    this.refreshDisplay();
       }
     }, 1000);
   }
